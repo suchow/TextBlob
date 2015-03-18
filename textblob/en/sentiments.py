@@ -6,7 +6,8 @@
 from __future__ import absolute_import
 from collections import namedtuple
 
-import nltk
+from nltk.corpus import movie_reviews
+from nltk.classify import NaiveBayesClassifier
 
 from textblob.en import sentiment as pattern_sentiment
 from textblob.tokenizers import word_tokenize
@@ -59,14 +60,14 @@ class NaiveBayesAnalyzer(BaseSentimentAnalyzer):
     def train(self):
         """Train the Naive Bayes classifier on the movie review corpus."""
         super(NaiveBayesAnalyzer, self).train()
-        neg_ids = nltk.corpus.movie_reviews.fileids('neg')
-        pos_ids = nltk.corpus.movie_reviews.fileids('pos')
+        neg_ids = movie_reviews.fileids('neg')
+        pos_ids = movie_reviews.fileids('pos')
         neg_feats = [(self.feature_extractor(
-            nltk.corpus.movie_reviews.words(fileids=[f])), 'neg') for f in neg_ids]
+            movie_reviews.words(fileids=[f])), 'neg') for f in neg_ids]
         pos_feats = [(self.feature_extractor(
-            nltk.corpus.movie_reviews.words(fileids=[f])), 'pos') for f in pos_ids]
+            movie_reviews.words(fileids=[f])), 'pos') for f in pos_ids]
         train_data = neg_feats + pos_feats
-        self._classifier = nltk.classify.NaiveBayesClassifier.train(train_data)
+        self._classifier = NaiveBayesClassifier.train(train_data)
 
     def analyze(self, text):
         """Return the sentiment as a named tuple of the form:

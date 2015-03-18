@@ -6,7 +6,7 @@
 from __future__ import absolute_import
 from itertools import chain
 
-import nltk
+from nltk.tokenize import word_tokenize
 
 from textblob.utils import strip_punc
 from textblob.base import BaseTokenizer
@@ -31,7 +31,7 @@ class WordTokenizer(BaseTokenizer):
         :param text: string of text.
         :param include_punc: (optional) whether to include punctuation as separate tokens. Default to True.
         '''
-        tokens = nltk.tokenize.word_tokenize(text)
+        tokens = word_tokenize(text)
         if include_punc:
             return tokens
         else:
@@ -54,7 +54,7 @@ class SentenceTokenizer(BaseTokenizer):
     @requires_nltk_corpus
     def tokenize(self, text):
         '''Return a list of sentences.'''
-        return nltk.tokenize.sent_tokenize(text)
+        return sent_tokenize(text)
 
 #: Convenience function for tokenizing sentences
 sent_tokenize = SentenceTokenizer().itokenize

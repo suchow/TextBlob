@@ -2,7 +2,7 @@
 """Parts-of-speech tagger implementations."""
 from __future__ import absolute_import
 
-import nltk
+from nltk.tag import pos_tag
 
 from textblob.en import tag as pattern_tag
 from textblob.decorators import requires_nltk_corpus
@@ -31,5 +31,5 @@ class NLTKTagger(BaseTagger):
         """Tag a string `text`."""
         if tokenize:
             text = list(word_tokenize(text))
-        tagged = nltk.tag.pos_tag(text)
+        tagged = pos_tag(text)
         return tagged

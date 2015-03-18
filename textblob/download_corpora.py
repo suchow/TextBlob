@@ -13,7 +13,7 @@ option: ::
 
 """
 import sys
-import nltk
+from nltk import download
 
 MIN_CORPORA = [
     'brown',  # Required for FastNPExtractor
@@ -31,12 +31,12 @@ ALL_CORPORA = MIN_CORPORA + ADDITIONAL_CORPORA
 
 def download_lite():
     for each in MIN_CORPORA:
-        nltk.download(each)
+        download(each)
 
 
 def download_all():
     for each in ALL_CORPORA:
-        nltk.download(each)
+        download(each)
 
 
 def main():

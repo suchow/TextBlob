@@ -34,7 +34,9 @@ Example Usage:
 from __future__ import absolute_import
 from itertools import chain
 
-import nltk
+from nltk.classify import accuracy, NaiveBayesClassifier, PositiveNaiveBayesClassifier
+from nltk.classify.decisiontree import DecisionTreeClassifier
+from nltk.classify.maxent import MaxentClassifier
 
 from textblob.compat import basestring
 from textblob.decorators import cached_property
@@ -250,7 +252,7 @@ class NLTKClassifier(BaseClassifier):
         else:  # test_set is a list of tuples
             test_data = test_set
         test_features = [(self.extract_features(d), c) for d, c in test_data]
-        return nltk.classify.accuracy(self.classifier, test_features)
+        return accuracy(self.classifier, test_features)
 
     def update(self, new_data, *args, **kwargs):
         """Update the classifier with new training data and re-trains the
@@ -287,7 +289,7 @@ class NaiveBayesClassifier(NLTKClassifier):
     .. versionadded:: 0.6.0
     """
 
-    nltk_class = nltk.classify.NaiveBayesClassifier
+    nltk_class = NaiveBayesClassifier
 
     def prob_classify(self, text):
         """Return the label probability distribution for classifying a string
@@ -341,7 +343,7 @@ class DecisionTreeClassifier(NLTKClassifier):
     .. versionadded:: 0.6.2
     """
 
-    nltk_class = nltk.classify.decisiontree.DecisionTreeClassifier
+    nltk_class = DecisionTreeClassifier
 
     def pprint(self, *args, **kwargs):
         """Return a string containing a pretty-printed version of this decision
@@ -401,7 +403,7 @@ class PositiveNaiveBayesClassifier(NLTKClassifier):
     .. versionadded:: 0.7.0
     """
 
-    nltk_class = nltk.classify.PositiveNaiveBayesClassifier
+    nltk_class = PositiveNaiveBayesClassifier
 
     def __init__(self, positive_set, unlabeled_set,
                 feature_extractor=contains_extractor,
@@ -462,8 +464,8 @@ class PositiveNaiveBayesClassifier(NLTKClassifier):
 
 
 class MaxEntClassifier(NLTKClassifier):
-    __doc__ = nltk.classify.maxent.MaxentClassifier.__doc__
-    nltk_class = nltk.classify.maxent.MaxentClassifier
+    __doc__ = MaxentClassifier.__doc__
+    nltk_class = MaxentClassifier
 
     def prob_classify(self, text):
         """Return the label probability distribution for classifying a string

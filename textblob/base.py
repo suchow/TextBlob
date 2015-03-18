@@ -8,7 +8,7 @@ which define the interface for descendant classes.
 from __future__ import absolute_import
 from abc import ABCMeta, abstractmethod
 
-import nltk
+from nltk.tokenize.api import TokenizerI
 
 from textblob.compat import with_metaclass
 
@@ -41,7 +41,7 @@ class BaseNPExtractor(with_metaclass(ABCMeta)):
 
 ##### TOKENIZERS #####
 
-class BaseTokenizer(with_metaclass(ABCMeta), nltk.tokenize.api.TokenizerI):
+class BaseTokenizer(with_metaclass(ABCMeta), TokenizerI):
     """Abstract base class from which all Tokenizer classes inherit.
     Descendant classes must implement a ``tokenize(text)`` method
     that returns a list of noun phrases as strings.

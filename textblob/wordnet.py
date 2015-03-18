@@ -5,13 +5,11 @@ directly.
 .. versionadded:: 0.7.0
 
 """
-import nltk
+from nltk.corpus import wordnet
 
-#: wordnet module from nltk
-wordnet = nltk.corpus.wordnet
 #: Synset constructor
-Synset = nltk.corpus.wordnet.synset
+Synset = wordnet.synset
 #: Lemma constructor
-Lemma = nltk.corpus.wordnet.lemma
+Lemma = wordnet.lemma
 # Part of speech constants
 VERB, NOUN, ADJ, ADV = wordnet.VERB, wordnet.NOUN, wordnet.ADJ, wordnet.ADV

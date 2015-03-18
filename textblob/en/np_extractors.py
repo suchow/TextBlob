@@ -2,7 +2,12 @@
 '''Various noun phrase extractors.'''
 from __future__ import unicode_literals, absolute_import
 
-import nltk
+from nltk.corpus import conll2000, brown
+from nltk import ChunkParserI, UnigramTagger, BigramTagger, RegexpTagger, word_tokenize
+from nltk.chunk import tree2conlltags
+from nltk.chunk.util import conlltags2tree
+from nltk.tokenize import sent_tokenize
+from nltk.tree import Tree
 
 from textblob.taggers import PatternTagger
 from textblob.decorators import requires_nltk_corpus
@@ -10,7 +15,7 @@ from textblob.utils import tree2str, filter_insignificant
 from textblob.base import BaseNPExtractor
 
 
-class ChunkParser(nltk.ChunkParserI):
+class ChunkParser(ChunkParserI):
 
     def __init__(self):
         self._trained = False
@@ -18,12 +23,12 @@ class ChunkParser(nltk.ChunkParserI):
     @requires_nltk_corpus
     def train(self):
         '''Train the Chunker on the ConLL-2000 corpus.'''
-        train_data = [[(t, c) for _, t, c in nltk.chunk.tree2conlltags(sent)]
+        train_data = [[(t, c) for _, t, c in tree2conlltags(sent)]
                       for sent in
-                      nltk.corpus.conll2000.chunked_sents('train.txt',
+                      conll2000.chunked_sents('train.txt',
                                                     chunk_types=['NP'])]
-        unigram_tagger = nltk.UnigramTagger(train_data)
-        self.tagger = nltk.BigramTagger(train_data, backoff=unigram_tagger)
+        unigram_tagger = UnigramTagger(train_data)
+        self.tagger = BigramTagger(train_data, backoff=unigram_tagger)
         self._trained = True
 
     def parse(self, sentence):
@@ -35,7 +40,7 @@ class ChunkParser(nltk.ChunkParserI):
         chunktags = [chunktag for (pos, chunktag) in tagged_pos_tags]
         conlltags = [(word, pos, chunktag) for ((word, pos), chunktag) in
                      zip(sentence, chunktags)]
-        return nltk.chunk.util.conlltags2tree(conlltags)
+        return conlltags2tree(conlltags)
 
 
 class ConllExtractor(BaseNPExtractor):
@@ -63,7 +68,7 @@ class ConllExtractor(BaseNPExtractor):
 
     def extract(self, text):
         '''Return a list of noun phrases (strings) for body of text.'''
-        sentences = nltk.tokenize.sent_tokenize(text)
+        sentences = sent_tokenize(text)
         noun_phrases = []
         for sentence in sentences:
             parsed = self._parse_sentence(sentence)
@@ -71,7 +76,7 @@ class ConllExtractor(BaseNPExtractor):
             # noun phrase tree
             phrases = [_normalize_tags(filter_insignificant(each,
                        self.INSIGNIFICANT_SUFFIXES)) for each in parsed
-                       if isinstance(each, nltk.tree.Tree) and each.label()
+                       if isinstance(each, Tree) and each.label()
                        == 'NP' and len(filter_insignificant(each)) >= 1
                        and _is_match(each, cfg=self.CFG)]
             nps = [tree2str(phrase) for phrase in phrases]
@@ -106,8 +111,8 @@ class FastNPExtractor(BaseNPExtractor):
 
     @requires_nltk_corpus
     def train(self):
-        train_data = nltk.corpus.brown.tagged_sents(categories='news')
-        regexp_tagger = nltk.RegexpTagger([
+        train_data = brown.tagged_sents(categories='news')
+        regexp_tagger = RegexpTagger([
             (r'^-?[0-9]+(.[0-9]+)?$', 'CD'),
             (r'(-|:|;)$', ':'),
             (r'\'*$', 'MD'),
@@ -121,15 +126,15 @@ class FastNPExtractor(BaseNPExtractor):
             (r'.*ed$', 'VBD'),
             (r'.*', 'NN'),
             ])
-        unigram_tagger = nltk.UnigramTagger(train_data, backoff=regexp_tagger)
-        self.tagger = nltk.BigramTagger(train_data, backoff=unigram_tagger)
+        unigram_tagger = UnigramTagger(train_data, backoff=regexp_tagger)
+        self.tagger = BigramTagger(train_data, backoff=unigram_tagger)
         self._trained = True
         return None
 
 
     def _tokenize_sentence(self, sentence):
         '''Split the sentence into single words/tokens'''
-        tokens = nltk.word_tokenize(sentence)
+        tokens = word_tokenize(sentence)
         return tokens
 
     def extract(self, sentence):

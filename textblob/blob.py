@@ -25,8 +25,6 @@ import sys
 import json
 from collections import defaultdict
 
-import nltk
-
 from textblob.decorators import cached_property, requires_nltk_corpus
 from textblob.utils import lowerstrip, PUNCTUATION_REGEX
 from textblob.inflect import singularize as _singularize, pluralize as _pluralize
@@ -44,7 +42,11 @@ from textblob.en import suggest
 
 # Wordnet interface
 # NOTE: textblob.wordnet is not imported so that the wordnet corpus can be lazy-loaded
-_wordnet = nltk.corpus.wordnet
+from nltk.corpus import wordnet as _wordnet
+from nltk.stem import WordNetLemmatizer
+from nltk.tokenize.api import TokenizerI
+from nltk.tokenize import regexp_tokenize
+
 
 def _penn_to_wordnet(tag):
     """Converts a Penn corpus tag into a Wordnet tag."""
@@ -147,7 +149,7 @@ class Word(unicode):
         """
         if pos is None:
             pos = _wordnet.NOUN
-        lemmatizer = nltk.stem.WordNetLemmatizer()
+        lemmatizer = WordNetLemmatizer()
         return lemmatizer.lemmatize(self.string, pos)
 
     @cached_property
@@ -296,7 +298,7 @@ def _initialize_models(obj, tokenizer, pos_tagger,
     """Common initialization between BaseBlob and Blobber classes."""
     # tokenizer may be a textblob or an NLTK tokenizer
     obj.tokenizer = _validated_param(tokenizer, "tokenizer",
-                                    base_class=(BaseTokenizer, nltk.tokenize.api.TokenizerI),
+                                    base_class=(BaseTokenizer, TokenizerI),
                                     default=BaseBlob.tokenizer,
                                     base_class_name="BaseTokenizer")
     obj.np_extractor = _validated_param(np_extractor, "np_extractor",
@@ -537,7 +539,7 @@ class BaseBlob(StringlikeMixin, BlobComparableMixin):
         :rtype: :class:`BaseBlob <BaseBlob>`
         """
         # regex matches: contraction or word or punctuation or whitespace
-        tokens = nltk.tokenize.regexp_tokenize(self.raw, "\w*('\w*)+|\w+|[^\w\s]|\s")
+        tokens = regexp_tokenize(self.raw, "\w*('\w*)+|\w+|[^\w\s]|\s")
         corrected = (Word(w).correct() for w in tokens)
         ret = ''.join(corrected)
         return self.__class__(ret)
